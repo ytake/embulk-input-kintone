@@ -7,8 +7,6 @@ import org.embulk.input.kintone2.PluginTask
 
 object Kintone {
 
-  private val client = KintoneClientBuilder
-
   @throws[ConfigException]
   def validateAuth(task: PluginTask): Unit = {
     // username & passwordかapi tokenのどちらかでアクセス
@@ -19,7 +17,7 @@ object Kintone {
   }
 
   def configure(task: PluginTask): KintoneClientBuilder = {
-    val c = client.create(task.getDomain)
+    val c = KintoneClientBuilder.create(task.getDomain)
     if (task.getUsername.nonEmpty && task.getPassword.nonEmpty) {
       c.authByPassword(task.getUsername.get, task.getPassword.get)
     }

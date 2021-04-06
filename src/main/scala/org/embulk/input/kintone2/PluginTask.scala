@@ -5,6 +5,8 @@ import org.embulk.config.ConfigDefault
 import org.embulk.config.Task
 import org.embulk.spi.SchemaConfig
 
+import scala.collection.immutable.HashMap
+
 trait PluginTask extends Task {
 
   @Config("domain") def getDomain: String
@@ -33,4 +35,7 @@ trait PluginTask extends Task {
   @ConfigDefault("null") def getQuery: Option[String]
 
   @Config("fields") def getFields: SchemaConfig
+
+  @Config("mapping")
+  @ConfigDefault("null") def getMapping: HashMap[String, String]
 }

@@ -12,15 +12,21 @@ import java.util
 /**
  * for Kintone Input Plugin
  */
-class Kintone2InputPlugin extends InputPlugin {
+abstract class Kintone2InputPlugin extends InputPlugin {
 
   private val logger = Exec.getLogger(this.getClass)
 
   override def transaction(config: ConfigSource, control: InputPlugin.Control): ConfigDiff = {
-    // ???
+    val task = config.loadConfig(classOf[PluginTask])
+    val schema = task.getFields.toSchema
+    val taskCount = 1 // number of run() method calls
+    resume(task.dump, schema, taskCount, control)
   }
 
-  override def resume(taskSource: TaskSource, schema: Schema, taskCount: Int, control: InputPlugin.Control): ConfigDiff = ???
+  override def resume(taskSource: TaskSource, schema: Schema, taskCount: Int, control: InputPlugin.Control): ConfigDiff = {
+    control.run(taskSource, schema, taskCount)
+    Exec.newConfigDiff
+  }
 
   override def cleanup(taskSource: TaskSource, schema: Schema, taskCount: Int, successTaskReports: util.List[TaskReport]): Unit
 
@@ -52,12 +58,6 @@ class Kintone2InputPlugin extends InputPlugin {
               new Accessor(row)
               pageBuilder.flush()
             })
-            /*
-            for (record <- response.getRecords) {
-              schema.visitColumns(new Nothing(new Nothing(record), pageBuilder, task))
-              pageBuilder.addRecord()
-            }
-            */
             pageBuilder.flush()
             if (response.hasNext) {
               b.break

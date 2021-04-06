@@ -1,48 +1,64 @@
 package org.embulk.input.kintone2
 
 import com.google.gson.Gson
-import com.kintone.client.model.{FileBody, User}
-import org.embulk.spi.Exec
 import com.kintone.client.model.record.{FieldType, FieldValue, Record}
-
 import scala.jdk.CollectionConverters._
 import java.util
+import java.lang.reflect.Method
 
 class Accessor(records: Record) {
 
-  private val logger = Exec.getLogger(this.getClass)
   private val gson = new Gson
   private val delimiter = "\n"
 
   def get(name: String): String = {
 
     this.records.getFieldType(name) match {
-      case FieldType.USER_SELECT | FieldType.ORGANIZATION_SELECT | FieldType.GROUP_SELECT | FieldType.STATUS_ASSIGNEE =>
-        val members = this.records.getFieldValue(name).asInstanceOf[util.ArrayList[User]]
-        members
-          .asScala
-          .map(row => row.getCode)
-          .reduce((index, value) => index + this.delimiter + value)
-      case FieldType.SUBTABLE =>
-        val subTableValueItem = this.records.getSubtableFieldValue(name)
-        gson.toJson(subTableValueItem)
-      case FieldType.CREATOR | FieldType.MODIFIER =>
-        val m = this.records.getFieldValue(name).asInstanceOf[User]
-        m.getCode
+      case FieldType.USER_SELECT => this.records.getUserSelectFieldValue(name)
+        .asScala
+        .map(row => row.getCode)
+        .reduce(_ + this.delimiter + _)
+      case FieldType.ORGANIZATION_SELECT => this.records.getOrganizationSelectFieldValue(name)
+        .asScala
+        .map(row => row.getCode)
+        .reduce(_ + this.delimiter + _)
+      case FieldType.GROUP_SELECT => this.records.getGroupSelectFieldValue(name)
+        .asScala
+        .map(row => row.getCode)
+        .reduce(_ + this.delimiter + _)
+      case FieldType.STATUS_ASSIGNEE => this.records.getStatusAssigneeFieldValue
+        .asScala
+        .map(row => row.getCode)
+        .reduce(_ + this.delimiter + _)
+      case FieldType.SUBTABLE => gson.toJson(this.records.getSubtableFieldValue(name))
+      case FieldType.CREATOR => this.records.getCreatorFieldValue.getCode
+      case FieldType.MODIFIER => this.records.getModifierFieldValue.getCode
+      // check box向け
       case FieldType.CHECK_BOX | FieldType.MULTI_SELECT | FieldType.CATEGORY =>
-        val selectedItemList = this.records.getFieldValue(name).asInstanceOf[util.ArrayList[String]]
-        selectedItemList
-          .stream
-          .reduce((accum: String, value: String) => accum + this.delimiter + value)
-          .orElse("")
-      case FieldType.FILE =>
-        val cbFileList = this.records.getFieldValue(name).asInstanceOf[util.ArrayList[FileBody]]
-        cbFileList
-          .asScala
-          .map(row => row.getFileKey).reduce((accum: Any, value: Any) => accum + this.delimiter + value)
-      case FieldType.NUMBER => String.valueOf(this.records.getFieldValue(name))
+        val value = this.records.getFieldValue(name)
+        getReduceValue(value, getValuesMethod(value))
+      //
+      case FieldType.FILE => this.records.getFileFieldValue(name)
+        .asScala
+        .map(row => row.getFileKey)
+        .reduceLeft(_ + this.delimiter + _)
       case _ =>
-        this.records.getFieldValue(name).asInstanceOf[String]
+        val value = this.records.getFieldValue(name)
+        getSimpleValue(value, getValueMethod(value))
     }
   }
+
+  private def getSimpleValue(value: FieldValue, m: Method): String = m.invoke(value).toString
+
+  private def getReduceValue(value: FieldValue, m: Method): String = {
+    m.invoke(value)
+      .asInstanceOf[util.List[util.List[String]]]
+      .toArray
+      .reduceLeft(_ + this.delimiter + _)
+      .toString
+  }
+
+  private def getValueMethod(value: FieldValue): Method = value.getClass.getMethod("getValue")
+
+  private def getValuesMethod(value: FieldValue): Method = value.getClass.getMethod("getValues")
 }

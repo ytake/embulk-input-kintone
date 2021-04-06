@@ -5,7 +5,6 @@ version := "0.1"
 scalaVersion := "2.13.5"
 
 resolvers ++= Seq(
-  "mvn" at "https://mvnrepository.com/artifact",
   Resolver.jcenterRepo,
   Resolver.sonatypeRepo("releases")
 )
@@ -17,6 +16,6 @@ libraryDependencies ++= Seq(
   "org.embulk" % "embulk-core" % "0.9.7" % "provided",
   "junit" % "junit" % "4.13" % Test,
   "org.assertj" % "assertj-core" % "3.19.0" % Test,
-  "org.scalatest" %% "scalatest" % "3.2.5" % Test
+  "org.scalatest" %% "scalatest" % "3.2.7" % Test,
+  "org.scalatestplus" %% "junit-4-13" % "3.2.7.0" % Test
 )
-
