@@ -65,7 +65,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["ytake"]
   spec.summary       = %[Kintone2 input plugin for Embulk]
   spec.description   = %[Loads records from Kintone2.]
-  spec.email         = ["yuki.takezawa@stafes.com"]
+  spec.email         = ["yuuki.takezawa@comnect.jp.net"]
   spec.licenses      = ["MIT"]
   # TODO set this: spec.homepage      = "https://github.com/yuki.takezawa/embulk-input-kintone2"
 
