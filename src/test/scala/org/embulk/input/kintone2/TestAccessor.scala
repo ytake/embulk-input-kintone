@@ -1,7 +1,7 @@
 package org.embulk.input.kintone2
 
-import com.kintone.client.model.{Group, Organization, User}
-import com.kintone.client.model.record.{CheckBoxFieldValue, CreatorFieldValue, DateFieldValue, DateTimeFieldValue, DropDownFieldValue, FieldType, GroupSelectFieldValue, LinkFieldValue, ModifierFieldValue, MultiLineTextFieldValue, MultiSelectFieldValue, NumberFieldValue, OrganizationSelectFieldValue, RadioButtonFieldValue, RichTextFieldValue, SingleLineTextFieldValue, SubtableFieldValue, TableRow, TimeFieldValue, UserSelectFieldValue}
+import com.kintone.client.model.{FileBody, Group, Organization, User}
+import com.kintone.client.model.record.{CheckBoxFieldValue, CreatorFieldValue, DateFieldValue, DateTimeFieldValue, DropDownFieldValue, FieldType, FileFieldValue, GroupSelectFieldValue, LinkFieldValue, ModifierFieldValue, MultiLineTextFieldValue, MultiSelectFieldValue, NumberFieldValue, OrganizationSelectFieldValue, RadioButtonFieldValue, RichTextFieldValue, SingleLineTextFieldValue, SubtableFieldValue, TableRow, TimeFieldValue, UserSelectFieldValue}
 import org.junit.Assert._
 import org.junit.Test
 import org.scalatestplus.junit.AssertionsForJUnit
@@ -22,6 +22,15 @@ final class TestAccessor extends AssertionsForJUnit {
     table
       .putField("row1", new SingleLineTextFieldValue("single line"))
       .putField("multi1", new MultiSelectFieldValue(Seq("sample1", "sample2"): _*))
+    // file body
+    val fb = new FileBody
+    fb.setName("file1")
+    fb.setSize(0)
+    fb.setFileKey("123ecfrwqefknaflwen")
+    val fb2 = new FileBody
+    fb2.setName("file1")
+    fb2.setSize(0)
+    fb2.setFileKey("123ecfrwqefknaflwen")
     f
       .add("文字列__1行", new SingleLineTextFieldValue("test single line"))
       .add("数値", new NumberFieldValue(uniqueKey))
@@ -41,6 +50,7 @@ final class TestAccessor extends AssertionsForJUnit {
       .add("table", new SubtableFieldValue(Seq(table): _*))
       .add("creator", new CreatorFieldValue(new User("user1")))
       .add("modifier", new ModifierFieldValue(new User("user1")))
+      .add("file1", new FileFieldValue(Seq(fb, fb2): _*))
 
     val accessor = new Accessor(f.getRecords)
     assertEquals("test single line", accessor.get("文字列__1行"))
@@ -61,6 +71,7 @@ final class TestAccessor extends AssertionsForJUnit {
     assertEquals(this.subtableValue, accessor.get("table"))
     assertEquals("user1", accessor.get("creator"))
     assertEquals("user1", accessor.get("modifier"))
+    assertEquals("123ecfrwqefknaflwen\n123ecfrwqefknaflwen", accessor.get("file1"))
   }
 
   private def toLocalDate(ds: String): LocalDate = LocalDate.parse(ds, DateTimeFormatter.ofPattern("yyyy-MM-dd"))

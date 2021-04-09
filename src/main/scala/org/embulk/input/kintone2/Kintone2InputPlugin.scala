@@ -19,7 +19,7 @@ abstract class Kintone2InputPlugin extends InputPlugin {
   override def transaction(config: ConfigSource, control: InputPlugin.Control): ConfigDiff = {
     val task = config.loadConfig(classOf[PluginTask])
     val schema = task.getFields.toSchema
-    val taskCount = 1 // number of run() method calls
+    val taskCount = 1
     resume(task.dump, schema, taskCount, control)
   }
 
@@ -82,6 +82,4 @@ abstract class Kintone2InputPlugin extends InputPlugin {
     schema,
     output
   )
-
-  // @VisibleForTesting protected def getKintoneClient = new KintoneClient
 }
