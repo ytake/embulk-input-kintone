@@ -2,40 +2,49 @@ package org.embulk.input.kintone2
 
 import org.embulk.config.Config
 import org.embulk.config.ConfigDefault
-import org.embulk.config.Task
+import org.embulk.util.config.Task
 import org.embulk.spi.SchemaConfig
 
 import scala.collection.immutable.HashMap
 
 trait PluginTask extends Task {
 
-  @Config("domain") def getDomain: String
+  @Config("domain")
+  def getDomain: String
 
-  @Config("app_id") def getAppId: Int
+  @Config("app_id")
+  def getAppId: Int
 
   @Config("guest_space_id")
-  @ConfigDefault("null") def getGuestSpaceId: Option[Int]
+  @ConfigDefault("null")
+  def getGuestSpaceId: Option[Int]
 
   @Config("token")
-  @ConfigDefault("null") def getToken: Option[String]
+  @ConfigDefault("null")
+  def getToken: Option[String]
 
   @Config("username")
-  @ConfigDefault("null") def getUsername: Option[String]
+  def getUsername: Option[String]
 
   @Config("password")
-  @ConfigDefault("null") def getPassword: Option[String]
+  def getPassword: Option[String]
 
   @Config("basic_auth_username")
-  @ConfigDefault("null") def getBasicAuthUsername: Option[String]
+  @ConfigDefault("null")
+  def getBasicAuthUsername: Option[String]
 
   @Config("basic_auth_password")
-  @ConfigDefault("null") def getBasicAuthPassword: Option[String]
+  @ConfigDefault("null")
+  def getBasicAuthPassword: Option[String]
 
   @Config("query")
-  @ConfigDefault("null") def getQuery: Option[String]
+  @ConfigDefault("null")
+  def getQuery: Option[String]
 
-  @Config("fields") def getFields: SchemaConfig
+  @Config("fields")
+  def getFields: SchemaConfig
 
   @Config("mapping")
-  @ConfigDefault("null") def getMapping: HashMap[String, String]
+  @ConfigDefault("null")
+  def getMapping: HashMap[String, String]
 }

@@ -14,8 +14,9 @@ libraryDependencies ++= Seq(
   "com.google.inject" % "guice" % "4.2.3" % "provided",
   "com.google.code.gson" % "gson" % "2.8.6",
   "org.embulk" % "embulk-core" % "0.9.23" % "provided",
+  "org.embulk" % "embulk-util-config" % "0.1.4",
   "org.embulk" % "embulk-test" % "0.9.23" % Test,
-  "junit" % "junit" % "4.13" % Test,
+  "junit" % "junit" % "4.+" % Test,
   "org.assertj" % "assertj-core" % "3.19.0" % Test,
   "org.scalatest" %% "scalatest" % "3.2.7" % Test,
   "org.scalatestplus" %% "junit-4-13" % "3.2.7.0" % Test

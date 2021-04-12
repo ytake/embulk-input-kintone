@@ -21,10 +21,22 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile "org.embulk:embulk-core:0.9.7"
     compile "org.scala-lang:scala-library:2.13.5"
     compile "com.kintone:kintone-java-client:1.0.4"
+    compile "com.google.inject:guice:4.2.3"
+    provided "com.google.inject:guice:4.2.3"
+    compile "com.google.code.gson:gson:2.8.6"
+    compile "org.embulk:embulk-core:0.9.23"
     provided "org.embulk:embulk-core:0.9.23"
+    compile "org.embulk:embulk-util-config:0.1.4"
+    compile "org.embulk:embulk-core:0.9.23"
+    provided "org.embulk:embulk-core:0.9.23"
+    testCompile "org.embulk:embulk-test:0.9.23"
+    testCompile "org.embulk:embulk-core:0.9.23:tests"
+    testCompile "junit:junit:4.+"
+    testCompile "org.assertj:assertj-core:3.19.0"
+    testCompile "org.scalatest:scalatest:3.2.7"
+    testCompile "org.scalatestplus:junit-4-13:3.2.7.0"
 }
 
 task classpath(type: Copy, dependsOn: ["jar"]) {
