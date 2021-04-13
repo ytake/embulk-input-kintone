@@ -1,45 +1,41 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.google.common.annotations.VisibleForTesting
-import org.embulk.input.kintone2.client.Kintone
-// import scala.collection.JavaConversions._
+import net.jp.ytake.embulk.input.kintone.client.Kintone
 import org.embulk.config.{ConfigDiff, ConfigSource, TaskReport, TaskSource}
-import org.embulk.spi.{Exec, InputPlugin, PageOutput, Schema}
-import org.embulk.spi.PageBuilder
+import org.embulk.spi.{Exec, InputPlugin, PageBuilder, PageOutput, Schema}
+import org.embulk.util.config.ConfigMapperFactory
+import org.slf4j.LoggerFactory
+
 import scala.util.control.Breaks
 import java.util
 
 /**
  * for Kintone Input Plugin
  */
-abstract class Kintone2InputPlugin extends InputPlugin {
+class KintoneInputPlugin extends InputPlugin {
 
-  private val logger = Exec.getLogger(this.getClass)
+  private val logger = LoggerFactory.getLogger(classOf[KintoneInputPlugin])
+  private def configFactory = ConfigMapperFactory.builder().addDefaultModules().build();
 
   override def transaction(config: ConfigSource, control: InputPlugin.Control): ConfigDiff = {
-    val task = config.loadConfig(classOf[PluginTask])
+    val task =  configFactory.createConfigMapper.map(config, classOf[PluginTask])
     val schema = task.getFields.toSchema
     val taskCount = 1
-    resume(task.dump, schema, taskCount, control)
+    resume(task.toTaskSource, schema, taskCount, control)
   }
 
   override def resume(taskSource: TaskSource, schema: Schema, taskCount: Int, control: InputPlugin.Control): ConfigDiff = {
     control.run(taskSource, schema, taskCount)
-    Exec.newConfigDiff
+    configFactory.newConfigDiff
   }
 
-  override def cleanup(taskSource: TaskSource, schema: Schema, taskCount: Int, successTaskReports: util.List[TaskReport]): Unit
+  override def cleanup(taskSource: TaskSource, schema: Schema, taskCount: Int, successTaskReports: util.List[TaskReport]): Unit = {
+    //
+  }
 
-  /**
-   *
-   * @param taskSource
-   * @param schema
-   * @param taskIndex
-   * @param output
-   * @return
-   */
   override def run(taskSource: TaskSource, schema: Schema, taskIndex: Int, output: PageOutput): TaskReport = {
-    val task = taskSource.loadTask(classOf[PluginTask])
+    val task = configFactory.createTaskMapper().map(taskSource, classOf[PluginTask])
     try {
       val pageBuilder = getPageBuilder(schema, output)
       try {
@@ -60,7 +56,7 @@ abstract class Kintone2InputPlugin extends InputPlugin {
             })
             pageBuilder.flush()
             if (response.hasNext) {
-              b.break
+              // b.break
             }
           }
         }
@@ -72,12 +68,13 @@ abstract class Kintone2InputPlugin extends InputPlugin {
         logger.error(e.getMessage)
         throw e
     }
-    Exec.newTaskReport
+    configFactory.newTaskReport
   }
 
-  override def guess(config: ConfigSource): ConfigDiff = Exec.newConfigDiff
+  override def guess(config: ConfigSource): ConfigDiff = configFactory.newConfigDiff
 
-  @VisibleForTesting protected def getPageBuilder(schema: Schema, output: PageOutput) = new PageBuilder(
+  @VisibleForTesting
+  protected def getPageBuilder(schema: Schema, output: PageOutput): PageBuilder = Exec.getPageBuilder(
     Exec.getBufferAllocator,
     schema,
     output

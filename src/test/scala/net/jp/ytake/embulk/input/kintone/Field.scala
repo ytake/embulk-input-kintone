@@ -1,4 +1,4 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.kintone.client.model.record.{FieldValue, Record}
 

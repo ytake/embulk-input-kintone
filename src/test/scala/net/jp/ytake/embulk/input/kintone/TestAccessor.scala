@@ -1,15 +1,15 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.kintone.client.model.{FileBody, Group, Organization, User}
 import com.kintone.client.model.record.{CheckBoxFieldValue, CreatorFieldValue, DateFieldValue, DateTimeFieldValue, DropDownFieldValue, FieldType, FileFieldValue, GroupSelectFieldValue, LinkFieldValue, ModifierFieldValue, MultiLineTextFieldValue, MultiSelectFieldValue, NumberFieldValue, OrganizationSelectFieldValue, RadioButtonFieldValue, RichTextFieldValue, SingleLineTextFieldValue, SubtableFieldValue, TableRow, TimeFieldValue, UserSelectFieldValue}
 import org.junit.Assert._
 import org.junit.Test
-import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime, ZonedDateTime}
 
-final class TestAccessor extends AssertionsForJUnit {
+final class TestAccessor extends AnyFunSuite {
 
   private val uniqueKey = 1
   private val subtableValue = "[{\"fields\":{\"row1\":{\"value\":\"single line\"},\"multi1\":{\"values\":[\"sample1\",\"sample2\"]}},\"id\":1}]"
