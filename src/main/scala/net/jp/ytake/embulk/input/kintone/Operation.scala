@@ -1,4 +1,4 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.kintone.client.KintoneClient
 import com.kintone.client.api.record.{CreateCursorRequest, CreateCursorResponseBody, GetRecordsByCursorResponseBody}
@@ -17,7 +17,7 @@ class Operation(private val c: KintoneClient) {
     val request = new CreateCursorRequest
     c.record.createCursor(request.setApp(task.getAppId)
       .setFields(fields)
-      .setQuery(task.getQuery.getOrElse(""))
+      .setQuery(task.getQuery.orElse(""))
       .setSize(FETCH_SIZE)
     )
   }

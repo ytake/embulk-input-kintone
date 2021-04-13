@@ -1,33 +1,33 @@
-package org.embulk.input.kintone2.client
+package net.jp.ytake.embulk.input.kintone.client
 
 import com.kintone.client.KintoneClient
 import com.kintone.client.KintoneClientBuilder
+import net.jp.ytake.embulk.input.kintone.PluginTask
 import org.embulk.config.ConfigException
-import org.embulk.input.kintone2.PluginTask
 
 object Kintone {
 
   @throws[ConfigException]
   def validateAuth(task: PluginTask): Unit = {
     // username & passwordかapi tokenのどちらかでアクセス
-    if (task.getUsername.nonEmpty && task.getPassword.nonEmpty) return
-    else if (task.getToken.nonEmpty) return
+    if (task.getUsername.isPresent && task.getPassword.isPresent) return
+    else if (task.getToken.isPresent) return
     // パラメータが不足している場合は処理停止
-    throw new ConfigException("Username and password or token must be provided")
+    throw new ConfigException("username and password or token must be provided")
   }
 
   def configure(task: PluginTask): KintoneClientBuilder = {
     val c = KintoneClientBuilder.create(task.getDomain)
-    if (task.getUsername.nonEmpty && task.getPassword.nonEmpty) {
+    if (task.getUsername.isPresent && task.getPassword.isPresent) {
       c.authByPassword(task.getUsername.get, task.getPassword.get)
     }
-    if (task.getToken.nonEmpty) {
+    if (task.getToken.isPresent) {
       c.authByApiToken(task.getToken.get)
     }
-    if (task.getBasicAuthUsername.nonEmpty && task.getBasicAuthPassword.nonEmpty) {
+    if (task.getBasicAuthUsername.isPresent && task.getBasicAuthPassword.isPresent) {
       c.withBasicAuth(task.getBasicAuthUsername.get, task.getBasicAuthPassword.get)
     }
-    if (task.getGuestSpaceId.nonEmpty) {
+    if (task.getGuestSpaceId.isPresent) {
       c.setGuestSpaceId(task.getGuestSpaceId.get)
     }
     c

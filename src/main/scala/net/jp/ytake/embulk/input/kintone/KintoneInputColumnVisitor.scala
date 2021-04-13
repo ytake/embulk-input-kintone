@@ -1,11 +1,11 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.google.gson.{JsonParser => GsonParser}
-import org.embulk.spi.json.JsonParser
-import org.embulk.spi.time.TimestampParser
 
+import java.time.Instant
 import java.lang.{Boolean, Double, Long}
 import org.embulk.spi.{Column, ColumnVisitor, PageBuilder}
+import org.msgpack.value.ValueFactory
 
 class KintoneInputColumnVisitor(
                                  private val accessor: Accessor,
@@ -40,25 +40,25 @@ class KintoneInputColumnVisitor(
     pluginTask.getFields.getColumns.forEach(r => {
       if (r.getName.equals(column.getName)
         && r.getConfigSource != null
-        && r.getConfigSource.getObjectNode != null
-        && r.getConfigSource.getObjectNode.get("format") != null
-        && r.getConfigSource.getObjectNode.get("format").isTextual) {
-        pattern = r.getConfigSource.getObjectNode.get("format").asText()
+        && r.getConfigSource.getNestedOrGetEmpty("format") != null
+        && !r.getConfigSource.getNestedOrGetEmpty("format").isEmpty) {
+        pattern = r.getConfigSource.getNestedOrGetEmpty("format").toString
         return
       }
     })
     pageBuilder.setTimestamp(
       column,
-      TimestampParser
-        .of(pattern, "UTC")
-        .parse(accessor.get(column.getName))
+      Instant.parse(accessor.get(column.getName))
     )
+    //       TimestampParser
+    //        .of(pattern, "UTC")
+    //        .parse(accessor.get(column.getName))
   }
 
   override def jsonColumn(column: Column): Unit = {
     val v = GsonParser.parseString(accessor.get(column.getName))
     if (v.isJsonNull || v.isJsonPrimitive) pageBuilder.setNull(column)
-    else pageBuilder.setJson(column, new JsonParser().parse(v.toString))
+    else pageBuilder.setJson(column, ValueFactory.newString(v.toString))
   }
 
   private def isNull(value: Any): scala.Boolean = Option(value) match {

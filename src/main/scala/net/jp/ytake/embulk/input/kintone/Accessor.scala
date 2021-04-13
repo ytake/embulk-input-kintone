@@ -1,4 +1,4 @@
-package org.embulk.input.kintone2
+package net.jp.ytake.embulk.input.kintone
 
 import com.google.gson.Gson
 import com.kintone.client.model.record.{FieldType, FieldValue, Record}
@@ -54,7 +54,7 @@ class Accessor(records: Record) {
     m.invoke(value)
       .asInstanceOf[util.List[util.List[String]]]
       .toArray
-      .reduceLeft(_ + this.delimiter + _)
+      .reduceLeft(_.toString + this.delimiter + _.toString)
       .toString
   }
 
