@@ -1,6 +1,6 @@
 package net.jp.ytake.embulk.input.kintone.client
 
-import net.jp.ytake.embulk.input.kintone.{KintoneInputPlugin, PluginTask}
+import net.jp.ytake.embulk.input.kintone.PluginTask
 import org.junit.Assert._
 import org.junit.Test
 import org.embulk.util.config.ConfigMapperFactory
@@ -19,8 +19,6 @@ final class TestKintone {
     .builder
     .addDefaultModules()
     .addModule(new TypeModule).build
-
-  private val plugin = new KintoneInputPlugin()
 
   @Rule
   def runtime: EmbulkTestRuntime = new EmbulkTestRuntime()
@@ -56,7 +54,6 @@ final class TestKintone {
     )
     val list = new util.ArrayList[ColumnConfig]
     list.add(cc)
-
     val config = runtime.getExec.newConfigSource
       .set("domain", "example.cybozu.com")
       .set("app_id", 1234)

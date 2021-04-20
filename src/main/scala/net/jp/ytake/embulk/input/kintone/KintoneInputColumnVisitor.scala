@@ -1,11 +1,13 @@
 package net.jp.ytake.embulk.input.kintone
 
 import com.google.gson.{JsonParser => GsonParser}
-
-import java.time.Instant
+import scala.util.control.Exception._
+import java.time.{LocalDate, LocalDateTime, LocalTime, ZoneId, ZonedDateTime}
 import java.lang.{Boolean, Double, Long}
 import org.embulk.spi.{Column, ColumnVisitor, PageBuilder}
 import org.msgpack.value.ValueFactory
+
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
 
 class KintoneInputColumnVisitor(
                                  private val accessor: Accessor,
@@ -14,7 +16,8 @@ class KintoneInputColumnVisitor(
                                )
   extends ColumnVisitor {
 
-  private def defaultFormat = "%Y-%m-%dT%H:%M:%S%z"
+  private val datetimeFormatPattern = "yyyy-MM-dd'T'HH:mm'Z'"
+  private val dateFormatPattern = "yyyy-MM-dd"
 
   override def booleanColumn(column: Column): Unit = {
     pageBuilder.setBoolean(column, Boolean.parseBoolean(accessor.get(column.getName)))
@@ -36,23 +39,24 @@ class KintoneInputColumnVisitor(
   }
 
   override def timestampColumn(column: Column): Unit = {
-    var pattern = this.defaultFormat
-    pluginTask.getFields.getColumns.forEach(r => {
-      if (r.getName.equals(column.getName)
-        && r.getConfigSource != null
-        && r.getConfigSource.getNestedOrGetEmpty("format") != null
-        && !r.getConfigSource.getNestedOrGetEmpty("format").isEmpty) {
-        pattern = r.getConfigSource.getNestedOrGetEmpty("format").toString
-        return
-      }
-    })
-    pageBuilder.setTimestamp(
-      column,
-      Instant.parse(accessor.get(column.getName))
+    val value = accessor.get(column.getName)
+    if (value == "") {
+      pageBuilder.setNull(column)
+      return
+    }
+    val toInstant = failAsValue(classOf[DateTimeParseException])(
+      ZonedDateTime.of(
+        LocalDateTime.of(detectLocalDate(value, this.dateFormatPattern), LocalTime.MIN),
+        ZoneId.of("UTC")
+      ).toInstant
     )
-    //       TimestampParser
-    //        .of(pattern, "UTC")
-    //        .parse(accessor.get(column.getName))
+    val instant = toInstant(
+      ZonedDateTime.of(
+        detectLocalDateTime(value, this.datetimeFormatPattern),
+        ZoneId.of("UTC"))
+        .toInstant
+    )
+    pageBuilder.setTimestamp(column, instant)
   }
 
   override def jsonColumn(column: Column): Unit = {
@@ -64,5 +68,19 @@ class KintoneInputColumnVisitor(
   private def isNull(value: Any): scala.Boolean = Option(value) match {
     case Some(_) => true
     case None => false
+  }
+
+  private def detectLocalDateTime(datetime: CharSequence, pattern: String): LocalDateTime = {
+    LocalDateTime.parse(
+      datetime,
+      DateTimeFormatter.ofPattern(pattern)
+    )
+  }
+
+  private def detectLocalDate(date: CharSequence, pattern: String): LocalDate = {
+    LocalDate.parse(
+      date,
+      DateTimeFormatter.ofPattern(pattern)
+    )
   }
 }

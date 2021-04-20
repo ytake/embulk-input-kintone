@@ -47,7 +47,7 @@ trait PluginTask extends Task {
   def getQuery: Optional[String]
 
   @Config("fields")
-  def getFields: SchemaConfig
+  def getFields: Optional[SchemaConfig]
 
   @Config("mapping")
   @ConfigDefault("null")

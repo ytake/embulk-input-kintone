@@ -13,7 +13,9 @@ class Operation(private val c: KintoneClient) {
    */
   def makeCursor(task: PluginTask): CreateCursorResponseBody = {
     val fields = new util.ArrayList[String]
-    task.getFields.getColumns.forEach(c => fields.add(c.getName))
+    if (task.getFields.isPresent) {
+      task.getFields.get().getColumns.forEach(c => fields.add(c.getName))
+    }
     val request = new CreateCursorRequest
     c.record.createCursor(request.setApp(task.getAppId)
       .setFields(fields)
