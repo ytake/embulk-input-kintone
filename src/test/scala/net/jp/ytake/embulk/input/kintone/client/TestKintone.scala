@@ -46,7 +46,7 @@ final class TestKintone {
   }
 
   @Test(expected = classOf[ConfigException])
-  def shouldBe(): Unit = {
+  def shouldBeThrowConfigException(): Unit = {
     val cc = new ColumnConfig(
       "column",
       Types.JSON,
@@ -63,5 +63,31 @@ final class TestKintone {
         .createConfigMapper
         .map(config, classOf[PluginTask])
     )
+  }
+
+  @Test
+  def testShouldReturnExpectedMapValue(): Unit = {
+    val source = runtime.getExec.newConfigSource
+    val cc = new ColumnConfig(
+      "column",
+      Types.STRING,
+      source
+    )
+    val list = new util.ArrayList[ColumnConfig]
+    list.add(cc)
+    val map = new util.HashMap[String, String]
+    map.put("フォーム1", "form")
+    val config = source
+      .set("domain", "example.cybozu.com")
+      .set("app_id", 1234)
+      .set("fields", new SchemaConfig(list))
+      .set("mapping", map)
+    val tasks = configFactory
+      .createConfigMapper
+      .map(config, classOf[PluginTask])
+    assertFalse(tasks.getUsername.isPresent)
+    assertEquals(tasks.getAppId, 1234)
+    assertEquals(tasks.getDomain, "example.cybozu.com")
+    assertTrue(tasks.getMapping.isPresent)
   }
 }

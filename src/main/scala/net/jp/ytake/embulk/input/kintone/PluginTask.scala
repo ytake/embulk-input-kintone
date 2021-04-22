@@ -4,11 +4,7 @@ import org.embulk.util.config.Config
 import org.embulk.util.config.ConfigDefault
 import org.embulk.util.config.Task
 import org.embulk.util.config.units.SchemaConfig
-
-import java.util.Optional
-import scala.collection.mutable
-import scala.collection.mutable.Map
-import scala.util.chaining._
+import java.util
 
 trait PluginTask extends Task {
 
@@ -20,36 +16,37 @@ trait PluginTask extends Task {
 
   @Config("guest_space_id")
   @ConfigDefault("null")
-  def getGuestSpaceId: Optional[Int]
+  def getGuestSpaceId: util.Optional[Int]
 
   @Config("token")
   @ConfigDefault("null")
-  def getToken: Optional[String]
+  def getToken: util.Optional[String]
 
   @Config("username")
   @ConfigDefault("null")
-  def getUsername: Optional[String]
+  def getUsername: util.Optional[String]
 
   @Config("password")
   @ConfigDefault("null")
-  def getPassword: Optional[String]
+  def getPassword: util.Optional[String]
 
   @Config("basic_auth_username")
   @ConfigDefault("null")
-  def getBasicAuthUsername: Optional[String]
+  def getBasicAuthUsername: util.Optional[String]
 
   @Config("basic_auth_password")
   @ConfigDefault("null")
-  def getBasicAuthPassword: Optional[String]
+  def getBasicAuthPassword: util.Optional[String]
 
   @Config("query")
   @ConfigDefault("null")
-  def getQuery: Optional[String]
+  def getQuery: util.Optional[String]
 
   @Config("fields")
-  def getFields: Optional[SchemaConfig]
+  @ConfigDefault("null")
+  def getFields: util.Optional[SchemaConfig]
 
   @Config("mapping")
   @ConfigDefault("null")
-  def getMapping: Optional[mutable.Map[String, String]]
+  def getMapping: util.Optional[util.Map[String, String]]
 }
