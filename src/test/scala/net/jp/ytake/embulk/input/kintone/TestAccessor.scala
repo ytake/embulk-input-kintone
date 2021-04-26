@@ -15,7 +15,7 @@ import java.util
 final class TestAccessor {
 
   private val uniqueKey = 1
-  private val subtableValue = "[{\"fields\":{\"row1\":{\"value\":\"single line\"},\"multi1\":{\"values\":[\"sample1\",\"sample2\"]}},\"id\":1}]"
+  private val subtableValue = "{\"row1\":{\"type\":\"SINGLE_LINE_TEXT\",\"value\":\"single line\"},\"multi1\":{\"type\":\"MULTI_SELECT\",\"value\":[\"sample1\",\"sample2\"]}}"
   private val f = new Field
 
   @Test
@@ -29,10 +29,13 @@ final class TestAccessor {
     tableRow.setValue("single line")
     val tableRowTwo = new FieldValue
     tableRowTwo.setType(FieldType.MULTI_SELECT)
-    tableRowTwo.setValue(Seq("sample1", "sample2"))
+    val multiSelectRow = new util.ArrayList[String]()
+    multiSelectRow.add("sample1")
+    multiSelectRow.add("sample2")
+    tableRowTwo.setValue(multiSelectRow)
     tv.setID(1)
     tv.setValue(rows)
-    rows.put("single line", tableRow)
+    rows.put("row1", tableRow)
     rows.put("multi1", tableRowTwo)
     table.setType(FieldType.SUBTABLE)
     table.setValue(rows)
@@ -69,7 +72,10 @@ final class TestAccessor {
     richText.setType(FieldType.RICH_TEXT)
 
     val checkBox = new FieldValue
-    checkBox.setValue(Seq("sample1", "sample2"))
+    val checkList = new util.ArrayList[String]()
+    checkList.add("sample1")
+    checkList.add("sample2")
+    checkBox.setValue(checkList)
     checkBox.setType(FieldType.CHECK_BOX)
     f
       .add("文字列__1行", singleLine)
