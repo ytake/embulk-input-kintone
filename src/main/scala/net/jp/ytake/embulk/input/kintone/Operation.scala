@@ -1,30 +1,30 @@
 package net.jp.ytake.embulk.input.kintone
 
-import com.kintone.client.KintoneClient
-import com.kintone.client.api.record.{CreateCursorRequest, CreateCursorResponseBody, GetRecordsByCursorResponseBody}
+import com.cybozu.kintone.client.model.cursor.{CreateRecordCursorResponse, GetRecordCursorResponse}
+import com.cybozu.kintone.client.module.recordCursor.RecordCursor
 import java.util
 
-class Operation(private val c: KintoneClient) {
+class Operation(private val c: RecordCursor) {
 
-  private val FETCH_SIZE = 500
+  private val fetchSize = 500
 
   /**
-   * cursor作成
+   * cursor
    */
-  def makeCursor(task: PluginTask): CreateCursorResponseBody = {
+  def makeCursor(task: PluginTask): CreateRecordCursorResponse = {
     val fields = new util.ArrayList[String]
     if (task.getFields.isPresent) {
       task.getFields.get().getColumns.forEach(c => fields.add(c.getName))
     }
-    val request = new CreateCursorRequest
-    c.record.createCursor(request.setApp(task.getAppId)
-      .setFields(fields)
-      .setQuery(task.getQuery.orElse(""))
-      .setSize(FETCH_SIZE)
+    c.createCursor(
+      task.getAppId,
+      fields,
+      task.getQuery.orElse(""),
+      fetchSize
     )
   }
 
-  def retrieveResponseByCursor(res: CreateCursorResponseBody): GetRecordsByCursorResponseBody = c.record.getRecordsByCursor(res.getId)
+  def retrieveResponseByCursor(res: CreateRecordCursorResponse): GetRecordCursorResponse = c.getRecords(res.getId)
 
-  def deleteCursor(res: CreateCursorResponseBody): Unit = c.record.deleteCursor(res.getId)
+  def deleteCursor(res: CreateRecordCursorResponse): Unit = c.deleteCursor(res.getId)
 }

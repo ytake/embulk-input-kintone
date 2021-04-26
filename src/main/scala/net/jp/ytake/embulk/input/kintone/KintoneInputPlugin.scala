@@ -1,5 +1,6 @@
 package net.jp.ytake.embulk.input.kintone
 
+import com.cybozu.kintone.client.module.recordCursor.RecordCursor
 import com.google.common.annotations.VisibleForTesting
 import net.jp.ytake.embulk.input.kintone.client.Kintone
 import org.embulk.config.{ConfigDiff, ConfigSource, TaskReport, TaskSource}
@@ -18,13 +19,14 @@ import java.util
 class KintoneInputPlugin extends InputPlugin {
 
   private val logger = LoggerFactory.getLogger(classOf[KintoneInputPlugin])
+
   private def configFactory = ConfigMapperFactory
     .builder
     .addDefaultModules()
     .addModule(new TypeModule).build
 
   override def transaction(config: ConfigSource, control: InputPlugin.Control): ConfigDiff = {
-    val task =  configFactory.createConfigMapper.map(config, classOf[PluginTask])
+    val task = configFactory.createConfigMapper.map(config, classOf[PluginTask])
     val schema = task.getFields.orElse(
       new SchemaConfig(new util.ArrayList[ColumnConfig]
       )
@@ -49,8 +51,7 @@ class KintoneInputPlugin extends InputPlugin {
       try {
         // validation
         Kintone.validateAuth(task)
-        val client = Kintone.client(Kintone.configure(task))
-        val cursor = new Operation(client)
+        val cursor = new Operation(new RecordCursor(Kintone.connection(task)))
         // use cursor
         val cursorResponse = cursor.makeCursor(task)
         val b = new Breaks
@@ -64,7 +65,7 @@ class KintoneInputPlugin extends InputPlugin {
               pageBuilder.addRecord()
             })
             pageBuilder.flush()
-            if (!response.hasNext) {
+            if (!response.getNext) {
               b.break()
             }
           }
