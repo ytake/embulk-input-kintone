@@ -29,7 +29,6 @@ dependencies {
     compileOnly "org.embulk:embulk-api:0.10.19"
     compileOnly "org.embulk:embulk-spi:0.10.19"
     compile "org.scala-lang:scala-library:2.13.5"
-    compile "com.kintone:kintone-java-client:1.1.0"
     compile "com.google.code.gson:gson:2.8.6"
     compile "com.google.inject:guice:4.2.3"
     provided "com.google.inject:guice:4.2.3"
@@ -51,6 +50,7 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind:2.6.7"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.7"
     compile "javax.validation:validation-api:1.1.0.Final"
+    compile "com.kintone:kintone-java-client:1.2.0"
 
     testCompile "junit:junit:4.13"
     testCompile "org.embulk:embulk-core:0.10.19"
@@ -79,3 +79,10 @@ task scalatest(dependsOn: ['testClasses'], type: JavaExec) {
     args = ['-R', 'build/classes/scala/test', '-o']
     classpath = sourceSets.test.runtimeClasspath
 }
+
+task classpath(type: Copy, dependsOn: ["jar"]) {
+    doFirst { file("classpath").deleteDir() }
+    from (configurations.runtime - configurations.provided + files(jar.archivePath))
+    into "classpath"
+}
+clean { delete "classpath" }

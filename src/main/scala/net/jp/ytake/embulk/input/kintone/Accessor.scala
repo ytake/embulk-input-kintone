@@ -79,7 +79,7 @@ class Accessor(record: Record) {
     val values = m.invoke(value).asInstanceOf[util.List[util.List[String]]]
     if (values.size() != 0) {
       return values.toArray
-        .reduceLeft(_ + this.delimiter + _)
+        .reduceLeft(_.toString + this.delimiter + _.toString)
         .toString
     }
     ""
