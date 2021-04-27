@@ -1,11 +1,13 @@
 package net.jp.ytake.embulk.input.kintone.client
 
-import com.kintone.client.KintoneClient
-import com.kintone.client.KintoneClientBuilder
+import com.cybozu.kintone.client.authentication.Auth
+import com.cybozu.kintone.client.connection.Connection
 import net.jp.ytake.embulk.input.kintone.PluginTask
 import org.embulk.config.ConfigException
 
 object Kintone {
+
+  private val kintoneAuth = new Auth()
 
   @throws[ConfigException]
   def validateAuth(task: PluginTask): Unit = {
@@ -16,22 +18,19 @@ object Kintone {
     throw new ConfigException("username and password or token must be provided")
   }
 
-  def configure(task: PluginTask): KintoneClientBuilder = {
-    val c = KintoneClientBuilder.create(task.getDomain)
+  def connection(task: PluginTask): Connection = {
     if (task.getUsername.isPresent && task.getPassword.isPresent) {
-      c.authByPassword(task.getUsername.get, task.getPassword.get)
+      this.kintoneAuth.setPasswordAuth(task.getUsername.get, task.getPassword.get)
     }
     if (task.getToken.isPresent) {
-      c.authByApiToken(task.getToken.get)
+      this.kintoneAuth.setApiToken(task.getToken.get)
     }
     if (task.getBasicAuthUsername.isPresent && task.getBasicAuthPassword.isPresent) {
-      c.withBasicAuth(task.getBasicAuthUsername.get, task.getBasicAuthPassword.get)
+      this.kintoneAuth.setBasicAuth(task.getBasicAuthUsername.get, task.getBasicAuthPassword.get)
     }
     if (task.getGuestSpaceId.isPresent) {
-      c.setGuestSpaceId(task.getGuestSpaceId.get)
+      return new Connection(task.getDomain, this.kintoneAuth, task.getGuestSpaceId.orElse(-1))
     }
-    c
+    new Connection(task.getDomain, this.kintoneAuth)
   }
-
-  def client(clientBuilder: KintoneClientBuilder): KintoneClient = clientBuilder.build()
 }

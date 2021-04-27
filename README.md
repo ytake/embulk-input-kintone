@@ -1,6 +1,8 @@
 # Kintone input plugin for Embulk
 
-WIP
+For Embulk >= 0.10.19
+
+*wip filter plugin
 
 ## Overview
 
@@ -11,7 +13,38 @@ WIP
 
 ## Configuration
 
-- **option1**: description (integer, required)
-- **option2**: description (string, default: `"myvalue"`)
-- **option3**: description (string, default: `null`)
+### 
 
+```yaml
+in:
+  type: kintone
+  domain: example.cybozu.com
+  username: username
+  password: password
+  app_id: 1111
+  fields:
+    - {name: $id, type: long}
+    - {name: $revision, type: long}
+    - {name: foo, type: string}
+```
+
+## Usage
+
+### install embulk
+
+```bash
+curl --create-dirs -o /usr/local/bin/embulk -L "https://github.com/embulk/embulk/releases/download/v0.10.19/embulk-0.10.19.jar" \\
+ && chmod +x /usr/local/bin/embulk
+```
+
+### build
+
+```bash
+$ ./gradle classpath
+```
+
+### embulk run
+
+```bash
+$ embulk run -L /path/to/embulk-input-kintone/ your_config.yml
+```
