@@ -16,7 +16,7 @@ class KintoneInputColumnVisitor(
                                )
   extends ColumnVisitor {
 
-  private val datetimeFormatPattern = "yyyy-MM-dd'T'HH:mm'Z'"
+  private val datetimeFormatPattern = "yyyy-MM-dd'T'HH:mm:ss'Z'"
   private val dateFormatPattern = "yyyy-MM-dd"
 
   override def booleanColumn(column: Column): Unit = {
